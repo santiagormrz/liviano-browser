@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bar">#1C1B20</color>
-    <color name="field">#2A2930</color>
-    <color name="field_stroke">#3A3941</color>
-    <color name="ink">#ECECF1</color>
-    <color name="ink_soft">#A3A3AD</color>
-    <color name="accent">#FF5A5F</color>
-    <color name="page">#1C1B20</color>
+    <color name="bar">#0E0B1C</color>
+    <color name="field">#1D1628</color>
+    <color name="field_stroke">#33263D</color>
+    <color name="ink">#EEEBF2</color>
+    <color name="ink_soft">#A49BAD</color>
+    <color name="accent">#E23B52</color>
+    <color name="page">#0E0B1C</color>
 </resources>

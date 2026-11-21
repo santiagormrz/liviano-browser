@@ -430,6 +430,64 @@ class MainActivity : Activity() {
         toast("Agente: ${UserAgents.current.label}")
     }
 
+    // ------------------------------------------------------------------ accesos directos
+
+    private fun setShortcut(index: Int, shortcut: Shortcut?) {
+        Prefs.shortcuts = Prefs.shortcuts.toMutableList().also { it[index] = shortcut }
+        refreshStartPages()
+    }
+
+    /** Vuelve a generar la pantalla de inicio en las pestañas que la muestran. */
+    private fun refreshStartPages() {
+        val url = StartPage.url()
+        tabs.filter { StartPage.isStart(it.url) }.forEach { tab ->
+            tab.session.load(GeckoSession.Loader().uri(url).flags(GeckoSession.LOAD_FLAGS_REPLACE_HISTORY))
+            tab.url = url
+        }
+    }
+
+    private fun editShortcut(index: Int, suggestion: Shortcut? = null) {
+        val existing = Prefs.shortcuts.getOrNull(index)
+        val start = suggestion ?: existing
+        val pad = (20 * resources.displayMetrics.density).toInt()
+        val name = EditText(this).apply {
+            hint = "Nombre (opcional)"; isSingleLine = true; setText(start?.name ?: "")
+        }
+        val address = EditText(this).apply {
+            hint = "Dirección, p. ej. instagram.com"; isSingleLine = true
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
+            setText(start?.url ?: "")
+        }
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(pad, pad / 2, pad, 0)
+            addView(name); addView(address)
+        }
+        val builder = AlertDialog.Builder(this)
+            .setTitle(if (existing == null) "Agregar acceso directo" else "Editar acceso directo")
+            .setView(box)
+            .setPositiveButton("Guardar") { _, _ ->
+                val raw = address.text.toString().trim()
+                if (raw.isEmpty()) return@setPositiveButton
+                val url = if (Regex("^[a-zA-Z][a-zA-Z0-9+.-]*://").containsMatchIn(raw)) raw else "https://$raw"
+                setShortcut(index, Shortcut(name.text.toString().trim(), url))
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+        if (existing != null) builder.setNeutralButton("Quitar") { _, _ -> setShortcut(index, null) }
+        builder.show()
+        if (start == null) address.requestFocus()
+    }
+
+    /** Agrega la página actual en el primer lugar libre de la pantalla de inicio. */
+    private fun addCurrentToStart() {
+        val tab = current ?: return
+        if (tab.url.isBlank() || StartPage.isStart(tab.url)) { toast("Abrí una página primero"); return }
+        val free = Prefs.shortcuts.indexOfFirst { it == null }
+        if (free < 0) { toast("Los 8 accesos están ocupados: quitá uno desde la pantalla de inicio"); return }
+        val host = Uri.parse(tab.url).host?.removePrefix("www.") ?: ""
+        editShortcut(free, Shortcut(tab.title.take(24).ifBlank { host }, tab.url))
+    }
+
     // ------------------------------------------------------------------ menú
 
     private fun showMenu(anchor: View) {
@@ -445,6 +503,7 @@ class MainActivity : Activity() {
         m.add(0, 7, 0, "uBlock Origin")
         m.add(0, 8, 0, "Configuración de uBlock Origin")
         m.add(0, 9, 0, "Compartir")
+        m.add(0, 12, 0, "Agregar a la pantalla de inicio")
         m.add(0, 10, 0, "Ajustes…")
         m.add(0, 11, 0, "Salir")
         menu.setOnMenuItemClickListener { item ->
@@ -460,6 +519,7 @@ class MainActivity : Activity() {
                 9 -> tab?.url?.takeUnless { StartPage.isStart(it) }?.let { share(it, tab.title) }
                 10 -> showSettings()
                 11 -> finishAndRemoveTask()
+                12 -> addCurrentToStart()
             }
             true
         }
@@ -504,6 +564,7 @@ class MainActivity : Activity() {
                 engines.indexOf(SearchEngines.current)) { d, i ->
                 Prefs.engine = engines[i].key
                 d.dismiss()
+                refreshStartPages()
             }
             .show()
     }
@@ -630,6 +691,10 @@ class MainActivity : Activity() {
             override fun onCanGoForward(session: GeckoSession, canGoForward: Boolean) { tab.canGoForward = canGoForward }
 
             override fun onLoadRequest(session: GeckoSession, request: NavigationDelegate.LoadRequest): GeckoResult<AllowOrDeny>? {
+                StartPage.editIndex(request.uri)?.let { i ->
+                    main.post { editShortcut(i) }
+                    return GeckoResult.deny()
+                }
                 val scheme = Uri.parse(request.uri).scheme?.lowercase() ?: return GeckoResult.allow()
                 if (scheme in INTERNAL_SCHEMES) return GeckoResult.allow()
                 main.post { openExternal(request.uri) }
@@ -732,6 +797,15 @@ class MainActivity : Activity() {
         val actions = mutableListOf<Pair<String, () -> Unit>>()
         val link = el.linkUri
         val src = el.srcUri
+        // Accesos directos de la pantalla de inicio
+        if (link != null && StartPage.isStart(from.url)) {
+            StartPage.editIndex(link)?.let { editShortcut(it); return }
+            val index = Prefs.shortcuts.indexOfFirst { it?.url == link }
+            if (index >= 0) {
+                actions += "Editar acceso directo" to { editShortcut(index) }
+                actions += "Quitar acceso directo" to { setShortcut(index, null) }
+            }
+        }
         if (link != null) {
             actions += "Abrir en pestaña nueva" to { addTab(link, desktop = from.desktop); Unit }
             actions += "Abrir en segundo plano" to { addTab(link, select = false, desktop = from.desktop); toast("Abierto en segundo plano") }

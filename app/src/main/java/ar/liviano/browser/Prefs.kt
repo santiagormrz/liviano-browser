@@ -15,20 +15,55 @@ object Prefs {
         set(v) = p.edit().putString("ua_custom", v).apply()
 
     var engine: String
-        get() = p.getString("engine", "ddg") ?: "ddg"
+        get() = p.getString("engine", "google") ?: "google"
         set(v) = p.edit().putString("engine", v).apply()
+
+    /** 8 accesos directos de la pantalla de inicio (vacíos = null). */
+    var shortcuts: List<Shortcut?>
+        get() {
+            val raw = p.getString("shortcuts", null) ?: return Shortcut.DEFAULTS
+            return runCatching {
+                val arr = org.json.JSONArray(raw)
+                List(Shortcut.COUNT) { i ->
+                    arr.optJSONObject(i)?.let { Shortcut(it.optString("name"), it.optString("url")) }
+                        ?.takeIf { it.url.isNotBlank() }
+                }
+            }.getOrDefault(Shortcut.DEFAULTS)
+        }
+        set(list) {
+            val arr = org.json.JSONArray()
+            for (i in 0 until Shortcut.COUNT) {
+                val sc = list.getOrNull(i)
+                arr.put(if (sc == null) org.json.JSONObject.NULL
+                        else org.json.JSONObject().put("name", sc.name).put("url", sc.url))
+            }
+            p.edit().putString("shortcuts", arr.toString()).apply()
+        }
 
     var desktopByDefault: Boolean
         get() = p.getBoolean("desktop_default", false)
         set(v) = p.edit().putBoolean("desktop_default", v).apply()
 }
 
+data class Shortcut(val name: String, val url: String) {
+    companion object {
+        const val COUNT = 8
+        val DEFAULTS: List<Shortcut?> = listOf(
+            Shortcut("YouTube", "https://www.youtube.com/"),
+            Shortcut("Gmail", "https://mail.google.com/"),
+            Shortcut("Mercado Libre", "https://www.mercadolibre.com.ar/"),
+            Shortcut("Wikipedia", "https://es.wikipedia.org/"),
+            null, null, null, null,
+        )
+    }
+}
+
 object SearchEngines {
     data class Engine(val key: String, val name: String, val home: String, val query: String)
 
     val all = listOf(
-        Engine("ddg", "DuckDuckGo", "https://duckduckgo.com/", "https://duckduckgo.com/?q=%s"),
         Engine("google", "Google", "https://www.google.com/", "https://www.google.com/search?q=%s"),
+        Engine("ddg", "DuckDuckGo", "https://duckduckgo.com/", "https://duckduckgo.com/?q=%s"),
         Engine("bing", "Bing", "https://www.bing.com/", "https://www.bing.com/search?q=%s"),
         Engine("brave", "Brave Search", "https://search.brave.com/", "https://search.brave.com/search?q=%s"),
         Engine("startpage", "Startpage", "https://www.startpage.com/", "https://www.startpage.com/do/search?q=%s"),

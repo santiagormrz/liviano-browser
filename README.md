@@ -22,7 +22,10 @@ es el único motor embebible en Android que ejecuta extensiones reales, así que
 - Descargas a la carpeta *Descargas*, pantalla completa para videos, menú al mantener presionado
   sobre enlaces e imágenes, subida de archivos, diálogos de las páginas (alert, `<select>`, fechas,
   autenticación HTTP), permisos de cámara, micrófono y ubicación (los pide en el momento).
-- Buscador a elección: DuckDuckGo, Google, Bing, Brave o Startpage.
+- Pantalla de inicio con buscador y **8 accesos directos** (dos filas de 4): tocá un lugar vacío
+  para agregar uno, mantené presionado uno existente para editarlo o quitarlo, o usá
+  *Menú → Agregar a la pantalla de inicio* estando en cualquier página.
+- Buscador: Google (predeterminado), DuckDuckGo, Bing, Brave o Startpage.
 - Borrar cookies, caché y sesiones sin perder la configuración de uBO.
 - Se puede elegir como navegador predeterminado de Android.
 - Tema claro/oscuro según el sistema.

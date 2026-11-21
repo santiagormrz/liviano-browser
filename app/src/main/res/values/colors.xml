@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bar">#F4F4F6</color>
+    <!-- Colores de marca ASSBOXER: negro, azul noche y bordó -->
+    <color name="bar">#F4F3F6</color>
     <color name="field">#FFFFFF</color>
-    <color name="field_stroke">#DADCE0</color>
-    <color name="ink">#1F1F23</color>
-    <color name="ink_soft">#6B6B73</color>
-    <color name="accent">#B4141B</color>
-    <color name="page">#FFFFFF</color>
+    <color name="field_stroke">#DAD7DF</color>
+    <color name="ink">#1D0E23</color>
+    <color name="ink_soft">#6E6475</color>
+    <color name="accent">#8A0B22</color>
+    <color name="page">#0E0B1C</color>
 </resources>

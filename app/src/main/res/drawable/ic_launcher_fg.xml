@@ -1,12 +1,12 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <!-- Logo ABrowser: A y B en ligadura, con un punto en lugar del travesaño de la A -->
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="6.5"
-        android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M26,72 L41,36 L60,72" />
-    <path android:strokeColor="#FFFFFF" android:strokeWidth="6.5"
-        android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M60,72 L60,36 L67,36 A8,8 0,0 1,67 52 L60,52 L70,52 A10,10 0,0 1,70 72 Z" />
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M41.5,58 m-3.4,0 a3.4,3.4 0,1 0,6.8 0 a3.4,3.4 0,1 0,-6.8 0" />
+    <!-- Logo ABrowser: AB en el estilo tipográfico de ASSBOXER -->
+    <group android:translateX="26.4" android:translateY="38" android:scaleX="0.8" android:scaleY="0.8">
+        <path android:strokeColor="#FFFFFF" android:strokeWidth="8"
+            android:pathData="M4,40 L4,16 A12,12 0,0 1,28 16 L28,40" />
+        <path android:strokeColor="#FFFFFF" android:strokeWidth="8"
+            android:pathData="M4,26 L28,26" />
+        <path android:strokeColor="#FFFFFF" android:strokeWidth="8" android:strokeLineJoin="miter"
+            android:pathData="M44,36 L44,4 L55,4 A8,8 0,0 1,55 20 L44,20 L57,20 A8,8 0,0 1,57 36 Z" />
+    </group>
 </vector>
