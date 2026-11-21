@@ -1,14 +1,14 @@
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
+import java.util.zip.ZipInputStream
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
 }
 
 android {
     namespace = "ar.liviano.browser"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "ar.liviano.browser"
@@ -33,7 +33,7 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -62,10 +62,6 @@ android {
     }
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
 dependencies {
     implementation("org.mozilla.geckoview:geckoview:${property("geckoviewVersion")}")
 }
@@ -74,24 +70,26 @@ dependencies {
 // Descarga la última versión estable de uBlock Origin (firmada por Mozilla) y la
 // descomprime en assets/ como extensión incorporada. Borrá la carpeta para actualizarla.
 val ublockDir = file("src/main/assets/extensions/ublock")
+val ublockXpi = layout.buildDirectory.file("ublock/ublock.xpi").get().asFile
 val ublockUrl = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi"
 
 val fetchUblock by tasks.registering {
     description = "Descarga uBlock Origin y lo integra en el APK"
-    onlyIf { !File(ublockDir, "manifest.json").exists() }
+    val dir = ublockDir
+    val xpi = ublockXpi
+    onlyIf { !File(dir, "manifest.json").exists() }
     doLast {
-        val xpi = layout.buildDirectory.file("ublock/ublock.xpi").get().asFile
         xpi.parentFile.mkdirs()
-        var url = URL(ublockUrl)
+        var uri = URI.create(ublockUrl)
         var conn: HttpURLConnection
         var hops = 0
         while (true) {
-            conn = url.openConnection() as HttpURLConnection
+            conn = uri.toURL().openConnection() as HttpURLConnection
             conn.instanceFollowRedirects = false
             conn.setRequestProperty("User-Agent", "Liviano-build")
             val code = conn.responseCode
             if (code in 300..399 && hops++ < 10) {
-                url = URL(url, conn.getHeaderField("Location"))
+                uri = uri.resolve(conn.getHeaderField("Location"))
                 conn.disconnect()
                 continue
             }
@@ -99,13 +97,21 @@ val fetchUblock by tasks.registering {
             break
         }
         conn.inputStream.use { input -> xpi.outputStream().use { input.copyTo(it) } }
-        ublockDir.deleteRecursively()
-        copy {
-            from(zipTree(xpi))
-            into(ublockDir)
-            exclude("META-INF/**")
+
+        dir.deleteRecursively()
+        dir.mkdirs()
+        val root = dir.canonicalPath + File.separator
+        ZipInputStream(xpi.inputStream()).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                if (entry.name.startsWith("META-INF/")) continue
+                val out = File(dir, entry.name)
+                check(out.canonicalPath.startsWith(root)) { "Entrada inválida en el xpi: ${entry.name}" }
+                if (entry.isDirectory) out.mkdirs()
+                else { out.parentFile.mkdirs(); out.outputStream().use { zip.copyTo(it) } }
+            }
         }
-        logger.lifecycle("uBlock Origin integrado en $ublockDir")
+        println("uBlock Origin integrado en $dir")
     }
 }
 
