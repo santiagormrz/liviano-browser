@@ -51,6 +51,12 @@ android {
         }
     }
 
+    androidResources {
+        // Por defecto Android descarta las carpetas que empiezan con "_" dentro de assets,
+        // y uBlock Origin necesita su carpeta _locales para cargar.
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
     packaging {
         // Bibliotecas nativas comprimidas dentro del APK = descarga más liviana.
         jniLibs { useLegacyPackaging = true }
