@@ -101,7 +101,7 @@ class MainActivity : Activity() {
 
         App.instance.whenUblockReady { ext -> main.post { onUblockReady(ext) } }
 
-        if (!handleIntent(intent)) addTab(SearchEngines.current.home)
+        if (!handleIntent(intent)) addTab(StartPage.url())
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -163,7 +163,7 @@ class MainActivity : Activity() {
         urlBar.setOnFocusChangeListener { _, focused -> if (!focused) updateUrlBar() }
 
         findViewById<View>(R.id.tabsButton).setOnClickListener { showTabs() }
-        findViewById<View>(R.id.tabsButton).setOnLongClickListener { addTab(SearchEngines.current.home); true }
+        findViewById<View>(R.id.tabsButton).setOnLongClickListener { addTab(StartPage.url()); true }
         findViewById<View>(R.id.ublockButton).setOnClickListener { openUblockPopup() }
         findViewById<View>(R.id.ublockButton).setOnLongClickListener { openUblockSettings(); true }
         findViewById<ImageButton>(R.id.menuButton).setOnClickListener { showMenu(it) }
@@ -191,7 +191,7 @@ class MainActivity : Activity() {
 
     private fun updateUrlBar() {
         if (urlBar.hasFocus()) return
-        urlBar.setText(current?.url?.takeUnless { it == "about:blank" } ?: "")
+        urlBar.setText(current?.url?.takeUnless { it == "about:blank" || StartPage.isStart(it) } ?: "")
     }
 
     private fun updateProgress() {
@@ -232,7 +232,7 @@ class MainActivity : Activity() {
     private fun toUrl(input: String): String {
         val t = input.trim()
         return when {
-            t.isEmpty() -> SearchEngines.current.home
+            t.isEmpty() -> StartPage.url()
             Regex("^[a-zA-Z][a-zA-Z0-9+.-]*://").containsMatchIn(t) -> t
             t.startsWith("about:") || t.startsWith("data:") || t.startsWith("javascript:") -> t
             !t.contains(' ') && (t.startsWith("localhost") || Regex("""^[^\s/]+\.[^\s/]{2,}""").containsMatchIn(t)) -> "https://$t"
@@ -310,7 +310,7 @@ class MainActivity : Activity() {
         tabs.removeAt(index)
         tab.session.close()
         when {
-            tabs.isEmpty() -> addTab(SearchEngines.current.home)
+            tabs.isEmpty() -> addTab(StartPage.url())
             current == null -> selectTab(tabs[(index - 1).coerceAtLeast(0)])
         }
         updateUi()
@@ -360,7 +360,7 @@ class MainActivity : Activity() {
         dialog = AlertDialog.Builder(this)
             .setTitle("Pestañas (${tabs.size})")
             .setAdapter(adapter, null)
-            .setPositiveButton("Nueva pestaña") { _, _ -> addTab(SearchEngines.current.home) }
+            .setPositiveButton("Nueva pestaña") { _, _ -> addTab(StartPage.url()) }
             .setNegativeButton("Cerrar", null)
             .create()
         dialog.show()
@@ -452,12 +452,12 @@ class MainActivity : Activity() {
                 1 -> tab?.session?.goBack()
                 2 -> tab?.session?.goForward()
                 3 -> if (tab?.loading == true) tab.session.stop() else tab?.session?.reload()
-                4 -> { addTab(SearchEngines.current.home); urlBar.requestFocus() }
+                4 -> { addTab(StartPage.url()); urlBar.requestFocus() }
                 5 -> toggleDesktop()
                 6 -> chooseUserAgent()
                 7 -> openUblockPopup()
                 8 -> openUblockSettings()
-                9 -> tab?.url?.let { share(it, tab.title) }
+                9 -> tab?.url?.takeUnless { StartPage.isStart(it) }?.let { share(it, tab.title) }
                 10 -> showSettings()
                 11 -> finishAndRemoveTask()
             }

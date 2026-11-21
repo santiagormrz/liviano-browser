@@ -13,5 +13,5 @@ class Tab(val session: GeckoSession) {
     var badge: String? = null
 
     val displayTitle: String
-        get() = title.ifBlank { url.ifBlank { "Pestaña nueva" } }
+        get() = if (StartPage.isStart(url)) "Pestaña nueva" else title.ifBlank { url.ifBlank { "Pestaña nueva" } }
 }
