@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Liviano</string>
+    <string name="app_name">ABrowser</string>
     <string name="url_hint">Buscar o escribir dirección</string>
 </resources>

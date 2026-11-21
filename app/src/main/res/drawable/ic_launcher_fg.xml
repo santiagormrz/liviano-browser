@@ -1,7 +1,12 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Logo ABrowser: A y B en ligadura, con un punto en lugar del travesaño de la A -->
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="6.5"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M26,72 L41,36 L60,72" />
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="6.5"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M60,72 L60,36 L67,36 A8,8 0,0 1,67 52 L60,52 L70,52 A10,10 0,0 1,70 72 Z" />
     <path android:fillColor="#FFFFFF"
-        android:pathData="M74,30C55,31 41,44 38,63L33,77L37,78L42,68C60,68 73,53 74,30Z" />
-    <path android:strokeColor="#B4141B" android:strokeWidth="2.2" android:strokeLineCap="round"
-        android:pathData="M39,72L66,40" />
+        android:pathData="M41.5,58 m-3.4,0 a3.4,3.4 0,1 0,6.8 0 a3.4,3.4 0,1 0,-6.8 0" />
 </vector>

@@ -15,5 +15,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Liviano"
+rootProject.name = "ABrowser"
 include(":app")

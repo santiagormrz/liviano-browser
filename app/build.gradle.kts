@@ -11,7 +11,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "ar.liviano.browser"
+        applicationId = "com.assboxer.abrowser"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
@@ -86,7 +86,7 @@ val fetchUblock by tasks.registering {
         while (true) {
             conn = uri.toURL().openConnection() as HttpURLConnection
             conn.instanceFollowRedirects = false
-            conn.setRequestProperty("User-Agent", "Liviano-build")
+            conn.setRequestProperty("User-Agent", "ABrowser-build")
             val code = conn.responseCode
             if (code in 300..399 && hops++ < 10) {
                 uri = uri.resolve(conn.getHeaderField("Location"))
@@ -116,3 +116,6 @@ val fetchUblock by tasks.registering {
 }
 
 tasks.named("preBuild") { dependsOn(fetchUblock) }
+
+// Nombre de los APK generados: ABrowser-arm64-v8a-release.apk, etc.
+base { archivesName.set("ABrowser") }

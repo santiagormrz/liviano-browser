@@ -1,4 +1,6 @@
-# Liviano: navegador para Android con uBlock Origin integrado
+# ABrowser: navegador para Android con uBlock Origin integrado
+
+*Desarrollado por ASSBOXER.*
 
 Un navegador mínimo hecho sobre **GeckoView**, el motor de Firefox. Lo usamos porque
 es el único motor embebible en Android que ejecuta extensiones reales, así que
@@ -31,9 +33,9 @@ Sin telemetría, sin cuentas, sin librerías extra: solo GeckoView y el framewor
 
 1. Creá un repositorio en GitHub (puede ser privado) y subí esta carpeta.
 2. GitHub Actions compila solo. Entrá a **Actions → Compilar APK → la última ejecución**
-   y descargá el artefacto **Liviano-APK**.
+   y descargá el artefacto **ABrowser-APK**.
 3. Adentro hay un APK por arquitectura. Casi todos los celulares actuales usan
-   **`app-arm64-v8a-release.apk`**. Si es muy viejo (32 bits), usá `armeabi-v7a`.
+   **`ABrowser-arm64-v8a-release.apk`**. Si es muy viejo (32 bits), usá `armeabi-v7a`.
 4. Pasalo al celular e instalalo (hay que permitir "instalar apps desconocidas").
 
 > **Firma:** si no configurás una clave propia, cada compilación en GitHub se firma con una clave
@@ -57,7 +59,7 @@ carpeta y volvé a compilar (las listas de filtros se actualizan solas, no hace 
 
 ## Tamaño
 
-El motor Gecko es lo que pesa: el APK de arm64 ronda los 60–80 MB. La app en sí agrega
+El motor Gecko es lo que pesa: el APK de arm64 ronda los 95 MB. La app en sí agrega
 unos pocos cientos de KB. No hay forma de tener uBlock Origin real con un motor más chico:
 el WebView del sistema (Chrome) no admite extensiones.
 

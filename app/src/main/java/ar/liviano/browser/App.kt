@@ -54,7 +54,7 @@ class App : Application() {
                     waiting.clear()
                 }
             },
-            { e -> Log.e("Liviano", "No se pudo cargar uBlock Origin", e) }
+            { e -> Log.e("ABrowser", "No se pudo cargar uBlock Origin", e) }
         )
     }
 }

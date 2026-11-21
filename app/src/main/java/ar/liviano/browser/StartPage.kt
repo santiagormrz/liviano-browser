@@ -8,7 +8,7 @@ import android.util.Base64
  */
 object StartPage {
     private const val PREFIX = "data:text/html;charset=utf-8;base64,"
-    private const val MARKER = "<!--liviano-start-->"
+    private const val MARKER = "<!--abrowser-start-->"
 
     fun url(): String {
         val engine = SearchEngines.current
@@ -32,8 +32,9 @@ object StartPage {
                      display: flex; flex-direction: column; }
               main { flex: 1; display: flex; flex-direction: column; align-items: center;
                      justify-content: center; padding: 24px; gap: 22px; margin-top: -8vh; }
-              h1 { margin: 0; font-size: 34px; font-weight: 600; letter-spacing: -0.5px; }
-              h1 span { color: var(--accent); }
+              .brand { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+              .logo { width: 84px; height: 84px; }
+              h1 { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.3px; }
               form { width: 100%; max-width: 520px; }
               input { width: 100%; height: 48px; padding: 0 20px; font-size: 16px;
                       color: var(--ink); background: var(--field); border: 1px solid var(--line);
@@ -44,7 +45,16 @@ object StartPage {
             </style>
             </head><body>
             <main>
-              <h1>Liviano<span>.</span></h1>
+              <div class="brand">
+                <svg class="logo" viewBox="20 30 68 48" aria-hidden="true">
+                  <g fill="none" stroke="var(--accent)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M26,72 L41,36 L60,72"/>
+                    <path d="M60,72 L60,36 L67,36 A8,8 0 0 1 67,52 L60,52 L70,52 A10,10 0 0 1 70,72 Z"/>
+                  </g>
+                  <circle cx="41.5" cy="58" r="3.4" fill="var(--accent)"/>
+                </svg>
+                <h1>ABrowser</h1>
+              </div>
               <form action="$action" method="get">
                 <input type="search" name="q" placeholder="Buscar con ${engine.name}"
                        autocomplete="off" enterkeyhint="search">
