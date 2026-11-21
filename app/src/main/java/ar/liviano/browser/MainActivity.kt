@@ -38,6 +38,7 @@ import android.widget.PopupMenu
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import android.util.Log
 import android.window.OnBackInvokedDispatcher
 import org.mozilla.geckoview.AllowOrDeny
 import org.mozilla.geckoview.GeckoResult
@@ -164,6 +165,7 @@ class MainActivity : Activity() {
 
         findViewById<View>(R.id.tabsButton).setOnClickListener { showTabs() }
         findViewById<View>(R.id.tabsButton).setOnLongClickListener { addTab(StartPage.url()); true }
+        findViewById<View>(R.id.homeButton).setOnClickListener { load(StartPage.url()) }
         findViewById<View>(R.id.ublockButton).setOnClickListener { openUblockPopup() }
         findViewById<View>(R.id.ublockButton).setOnLongClickListener { openUblockSettings(); true }
         findViewById<ImageButton>(R.id.menuButton).setOnClickListener { showMenu(it) }
@@ -590,18 +592,20 @@ class MainActivity : Activity() {
 
     private val ublockActionDelegate = object : WebExtension.ActionDelegate {
         override fun onBrowserAction(extension: WebExtension, session: GeckoSession?, action: WebExtension.Action) {
-            if (session == null) {
+            Log.i(App.TAG, "uBO acción: sesión=${session != null} badge=${action.badgeText}")
+            if (session != null) tabFor(session)?.action = action
+            if (session == null || ublockAction == null) {
                 ublockAction = action
                 action.icon?.getBitmap((24 * resources.displayMetrics.density).toInt())?.accept { bmp ->
                     if (bmp != null) main.post { ublockIcon.setImageBitmap(bmp) }
                 }
-            } else {
-                tabFor(session)?.badge = action.badgeText
             }
+            if (session != null) tabFor(session)?.badge = action.badgeText
             updateBadge()
         }
 
         override fun onTogglePopup(extension: WebExtension, action: WebExtension.Action): GeckoResult<GeckoSession>? {
+            Log.i(App.TAG, "uBO abre su panel")
             val popup = GeckoSession()
             popup.open(runtime)
             showUblockPopup(popup)
@@ -625,6 +629,7 @@ class MainActivity : Activity() {
     }
 
     private fun onUblockReady(ext: WebExtension) {
+        Log.i(App.TAG, "uBO listo en la interfaz; opciones=${ext.metaData.optionsPageUrl}")
         ublock = ext
         ext.setActionDelegate(ublockActionDelegate)
         ext.setTabDelegate(ublockTabDelegate)
@@ -637,15 +642,28 @@ class MainActivity : Activity() {
         tab.session.webExtensionController.setTabDelegate(ext, ublockSessionTabDelegate)
     }
 
+    private fun ublockUnavailable(): Boolean {
+        if (ublock != null) return false
+        val error = App.instance.ublockError
+        toast(if (error != null) "uBlock Origin no pudo cargarse: ${error.message}" else "uBlock Origin se está iniciando…")
+        return true
+    }
+
     private fun openUblockPopup() {
-        val action = ublockAction
-        if (action == null) { toast("uBlock Origin se está iniciando…"); return }
-        action.click()
+        if (ublockUnavailable()) return
+        val action = current?.action ?: ublockAction
+        if (action != null) { action.click(); return }
+        // Sin acción todavía: abrimos el panel de uBO directamente como página.
+        val base = ublock?.metaData?.optionsPageUrl?.substringBeforeLast('/') ?: return
+        val popup = GeckoSession()
+        popup.open(runtime)
+        popup.loadUri("$base/popup-fenix.html")
+        showUblockPopup(popup)
     }
 
     private fun openUblockSettings() {
-        val url = ublock?.metaData?.optionsPageUrl
-        if (url == null) { toast("uBlock Origin se está iniciando…"); return }
+        if (ublockUnavailable()) return
+        val url = ublock?.metaData?.optionsPageUrl ?: return
         addTab(url, desktop = false)
     }
 

@@ -48,13 +48,8 @@ object Prefs {
 data class Shortcut(val name: String, val url: String) {
     companion object {
         const val COUNT = 8
-        val DEFAULTS: List<Shortcut?> = listOf(
-            Shortcut("YouTube", "https://www.youtube.com/"),
-            Shortcut("Gmail", "https://mail.google.com/"),
-            Shortcut("Mercado Libre", "https://www.mercadolibre.com.ar/"),
-            Shortcut("Wikipedia", "https://es.wikipedia.org/"),
-            null, null, null, null,
-        )
+        // Vacíos: cada uno elige los suyos.
+        val DEFAULTS: List<Shortcut?> = List(COUNT) { null }
     }
 }
 

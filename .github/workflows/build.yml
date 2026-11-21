@@ -2,6 +2,8 @@ name: Compilar APK
 
 on:
   push:
+    branches: ["**"]
+    tags: ["v*"]
   workflow_dispatch:
 
 jobs:
@@ -19,13 +21,12 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      # Opcional: firma con tu propia clave para poder actualizar sin desinstalar.
-      # Creá los secretos KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS y KEY_PASSWORD.
+      # Firma fija (secretos del repo) para poder actualizar sin desinstalar.
       - name: Preparar clave de firma
         if: env.KEYSTORE_BASE64 != ''
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/liviano.jks"
-          echo "LIVIANO_KEYSTORE=$RUNNER_TEMP/liviano.jks" >> "$GITHUB_ENV"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/abrowser.jks"
+          echo "LIVIANO_KEYSTORE=$RUNNER_TEMP/abrowser.jks" >> "$GITHUB_ENV"
 
       - name: Compilar
         env:
@@ -40,3 +41,55 @@ jobs:
         with:
           name: ABrowser-APK
           path: app/build/outputs/apk/release/*.apk
+
+  # Prueba en un emulador Android: abre la app, toca uBlock Origin y guarda registro y capturas.
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ABrowser-APK
+          path: apk
+
+      - name: Habilitar KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo apt-get install -y -qq python3-pil >/dev/null
+
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash .github/scripts/emulator-test.sh
+
+  # Al subir una etiqueta vX.Y se publica la versión en "Releases" con los APK.
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ABrowser-APK
+          path: apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ABrowser ${{ github.ref_name }}
+          files: apk/*.apk
+          body: |
+            **Para la mayoría de los celulares:** `ABrowser-arm64-v8a-release.apk`.
+            Celulares viejos de 32 bits: `armeabi-v7a`. Emuladores/PC: `x86_64`.
+
+            Desarrollado por ASSBOXER.

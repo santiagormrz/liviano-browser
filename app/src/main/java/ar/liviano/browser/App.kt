@@ -12,6 +12,7 @@ class App : Application() {
         lateinit var instance: App
             private set
 
+        const val TAG = "ABrowser"
         const val UBO_ID = "uBlock0@raymondhill.net"
         const val UBO_PATH = "resource://android/assets/extensions/ublock/"
     }
@@ -37,6 +38,10 @@ class App : Application() {
     var ublock: WebExtension? = null
         private set
 
+    /** Motivo por el que uBlock Origin no cargó, si falló. */
+    var ublockError: Throwable? = null
+        private set
+
     private val waiting = mutableListOf<(WebExtension) -> Unit>()
 
     /** Ejecuta [block] cuando uBlock Origin esté listo (o en el acto, si ya lo está). */
@@ -48,13 +53,17 @@ class App : Application() {
     private fun installUblock(rt: GeckoRuntime) {
         rt.webExtensionController.ensureBuiltIn(UBO_PATH, UBO_ID).accept(
             { ext ->
+                Log.i(TAG, "uBlock Origin cargado: ${ext?.id} ${ext?.metaData?.version}")
                 if (ext != null) {
                     ublock = ext
                     waiting.toList().forEach { it(ext) }
                     waiting.clear()
                 }
             },
-            { e -> Log.e("ABrowser", "No se pudo cargar uBlock Origin", e) }
+            { e ->
+                ublockError = e
+                Log.e(TAG, "No se pudo cargar uBlock Origin", e)
+            }
         )
     }
 }

@@ -6,6 +6,21 @@
     android:background="@color/bar"
     android:orientation="vertical">
 
+    <org.mozilla.geckoview.GeckoView
+        android:id="@+id/geckoView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:indeterminate="false"
+        android:max="100"
+        android:progressTint="@color/accent"
+        android:visibility="invisible" />
+
     <LinearLayout
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -34,6 +49,14 @@
                 android:textSize="11sp"
                 android:textStyle="bold" />
         </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/homeButton"
+            android:layout_width="40dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Inicio"
+            android:src="@drawable/ic_home" />
 
         <EditText
             android:id="@+id/urlBar"
@@ -97,19 +120,4 @@
             android:src="@drawable/ic_more" />
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:indeterminate="false"
-        android:max="100"
-        android:progressTint="@color/accent"
-        android:visibility="invisible" />
-
-    <org.mozilla.geckoview.GeckoView
-        android:id="@+id/geckoView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
 </LinearLayout>
