@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bar">#F4F4F6</color>
+    <color name="field">#FFFFFF</color>
+    <color name="field_stroke">#DADCE0</color>
+    <color name="ink">#1F1F23</color>
+    <color name="ink_soft">#6B6B73</color>
+    <color name="accent">#B4141B</color>
+    <color name="page">#FFFFFF</color>
+</resources>
