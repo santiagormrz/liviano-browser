@@ -5,7 +5,7 @@ set -u
 PKG=com.assboxer.abrowser
 
 shot() {
-  adb exec-out screencap -p > "/tmp/$1.png"
+  timeout 20 adb exec-out screencap -p > "/tmp/$1.png" || { echo "captura $1 falló"; return; }
   python3 - "$1" <<'PY'
 import base64, io, sys
 from PIL import Image
@@ -18,7 +18,7 @@ PY
 }
 
 tap_desc() {
-  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+  timeout 30 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
   adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
   local b
   b=$(grep -o "content-desc=\"$1\"[^>]*bounds=\"[^\"]*\"" /tmp/ui.xml | grep -o 'bounds="[^"]*"' | head -1)
@@ -37,16 +37,12 @@ shot inicio
 
 echo "Tocando el escudo de uBlock Origin"
 tap_desc "uBlock Origin"
-sleep 20
+sleep 1
+shot aviso
+sleep 15
 shot panel_ublock
-adb shell input keyevent KEYCODE_BACK
-sleep 3
-
-echo "Abriendo una página con publicidad"
-adb shell am start -a android.intent.action.VIEW -d "https://www.speedtest.net/" "$PKG"
-sleep 40
-shot pagina
 
 echo "===== LOGCAT ====="
-adb logcat -d | grep -iE "ABrowser|WebExtension|ublock|GeckoConsole|Extension|AndroidRuntime|FATAL" | tail -400
+adb logcat -d | grep -iE "ABrowser|WebExtension|ublock|GeckoConsole|Extension|AndroidRuntime|FATAL|Gecko.*(error|fail)" | tail -400
+echo "===== FIN LOGCAT ====="
 exit 0
